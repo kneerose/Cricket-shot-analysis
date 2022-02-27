@@ -18,7 +18,7 @@ class _SampleShotsState extends State<SampleShots> {
       RefreshController(initialRefresh: false);
   List sampleId = [];
   void fetchSampleAnalysis() async {
-    List data = await ServerOperation().fetchSampleAnalysis();
+    List data = await ServerOp().fetchSampleAnalysis();
     print(data.length);
     for (int i = 0; i < data.length; i++) {
       if (data[i] != null) {
@@ -96,12 +96,22 @@ class _SampleShotsState extends State<SampleShots> {
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Column(
                             children: [
-                              Image(
-                                image: NetworkImage(
-                                    "https://shotanalysis.000webhostapp.com/sample_analysis/${sampleAnalysis[items].src}"),
-                                width: 150,
-                                height: 130,
-                                fit: BoxFit.fill,
+                              Expanded(
+                                child: Image(
+                                  image: NetworkImage(
+                                      "https://shotanalysis.000webhostapp.com/sample_analysis/${sampleAnalysis[items].src}"),
+                                  width: 150,
+                                  height: 130,
+                                  loadingBuilder:
+                                      ((context, child, loadingProgress) {
+                                    if (loadingProgress == null) {
+                                      return child;
+                                    }
+                                    return const Center(
+                                        child: CircularProgressIndicator());
+                                  }),
+                                  fit: BoxFit.fill,
+                                ),
                               ),
                               heightSpace(10),
                               Container(

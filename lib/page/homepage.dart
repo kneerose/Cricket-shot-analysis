@@ -1,10 +1,11 @@
 import 'dart:io';
 
-import 'package:camera/camera.dart';
 import 'package:cricket_shot_analysis/constant.dart';
 import 'package:cricket_shot_analysis/model/newsmodel.dart';
 import 'package:cricket_shot_analysis/model/profilemodel.dart';
 import 'package:cricket_shot_analysis/model/sampleanalysismodel.dart';
+import 'package:cricket_shot_analysis/model/shotProfileModel.dart';
+import 'package:cricket_shot_analysis/model/shotmodel.dart';
 import 'package:cricket_shot_analysis/page/analysis/image.dart';
 import 'package:cricket_shot_analysis/page/news/latestnews.dart';
 import 'package:cricket_shot_analysis/page/players/addplayersdetails.dart';
@@ -18,6 +19,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cricket_shot_analysis/server/server_operation.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+String? token;
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -30,23 +34,28 @@ class _HomePageState extends State<HomePage> {
   final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
   bool isFetching = true;
-  List storyId = [];
-  List playerId = [];
-  List sampleId = [];
+  Set storyId = {};
+  Set playerId = {};
+  Set sampleId = {};
+  Set shotId = {};
   @override
   void initState() {
     // TODO: implement initState
     // fetchdata();
-    availablecamera();
+
+    sharedPrefGetToken();
     fetchSampleAnalysis();
     fetchNews();
     fetchPlayer();
+    fetchshot();
 
     super.initState();
   }
 
-  void availablecamera() async {
-    cameras = await availableCameras();
+  void sharedPrefGetToken() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    token = sharedPreferences.getString("token");
+    print("my token is $token");
   }
 
   // void fetchdata() {
@@ -54,19 +63,72 @@ class _HomePageState extends State<HomePage> {
   //     newsModel.add(NewsModel.fromMap(news[i]));
   //   }
   // }
+  List<ProfileModel> dataManage(data, id) {
+    List<ProfileModel> playersCopy = [];
+    List profiledetailsmatchdata = [];
+
+    // print(id);
+    for (int i = 0; i < id.length; i++) {
+      List<ShotProfileModel> shot = [];
+      for (int j = 0; j < 6; j++) {
+        shot.add(ShotProfileModel.fromMap({
+          "id": data[6 * i + j]['shot_id'],
+          "shot_name": data[6 * i + j]['shot_name'],
+          "shot_frequency": data[6 * i + j]['shot_frequency'],
+          "efficiency": data[6 * i + j]['efficiency'],
+        }));
+      }
+      print(shot);
+      profiledetailsmatchdata.add(data[6 * i]);
+      profiledetailsmatchdata[i].remove("shot_name");
+      profiledetailsmatchdata[i].remove("efficiency");
+      profiledetailsmatchdata[i].remove("shot_frequency");
+      profiledetailsmatchdata[i]["shot_profile"] = shot;
+      print(profiledetailsmatchdata[i]);
+
+      playersCopy.add(ProfileModel.fromMap(profiledetailsmatchdata[i]));
+
+      print("\n");
+    }
+    return playersCopy;
+  }
+
   void fetchPlayer() async {
-    List data = await ServerOperation().fetchplayerProfile();
-    print(data.length);
+    List data = await ServerOp().fetchplayerProfile();
+    //print(data.length);
+    Set id = {};
+    for (int i = 0; i < data.length; i++) {
+      id.add(int.parse(data[i]['id']));
+    }
+    if (playerId.isEmpty) {
+      setState(() {
+        players = dataManage(data, id);
+      });
+    } else {
+      if (playerId != id) {
+        setState(() {
+          players = dataManage(data, id);
+        });
+      }
+    }
+  }
+
+  void fetchshot() async {
+    List data = await ServerOp().fetchShot();
+    print("fetch ${data.length}");
+    print(data);
     for (int i = 0; i < data.length; i++) {
       if (data[i] != null) {
-        if (playerId.isEmpty) {
+        if (shotId.isEmpty) {
+          print(data[i]);
+          print("seperate");
           setState(() {
-            players.add(ProfileModel.fromMap(data[i]));
+            shotmodel.add(ShotModel.fromMap(data[i]));
           });
         } else {
-          if (!playerId.contains((int.parse(data[i]['id'])))) {
+          if (!shotId.contains((int.parse(data[i]['id'])))) {
             setState(() {
-              players.add(ProfileModel.fromMap(data[i]));
+              shotmodel.add(ShotModel.fromMap(data[i]));
             });
           }
         }
@@ -75,8 +137,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void fetchSampleAnalysis() async {
-    List data = await ServerOperation().fetchSampleAnalysis();
-    print(data.length);
+    List data = await ServerOp().fetchSampleAnalysis();
+    // print(data.length);
     for (int i = 0; i < data.length; i++) {
       if (data[i] != null) {
         if (sampleId.isEmpty) {
@@ -95,8 +157,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void fetchNews() async {
-    List data = await ServerOperation().fetchNewsList();
-    print(data.length);
+    List data = await ServerOp().fetchNewsList();
+    // print(data.length);
     for (int i = 0; i < data.length; i++) {
       if (data[i] != null) {
         if (storyId.isEmpty) {
@@ -119,14 +181,18 @@ class _HomePageState extends State<HomePage> {
 
   void sync() {
     setState(() {
-      storyId = news.map((e) => e.id).toList();
-      playerId = players.map((e) => e.id).toList();
-      sampleId = sampleAnalysis.map((e) => e.id).toList();
+      storyId = news.map((e) => e.id).toSet();
+      playerId = players.map((e) => e.id).toSet();
+      sampleId = sampleAnalysis.map((e) => e.id).toSet();
+      shotId = shotmodel.map((e) => e.id).toSet();
       // equipmentcategoryid = equipmentcategory.map((e) => e.id).toList();
     });
+    sharedPrefGetToken();
     fetchSampleAnalysis();
     fetchNews();
+    fetchshot();
     fetchPlayer();
+
     _refreshController.refreshCompleted();
   }
 
@@ -149,12 +215,7 @@ class _HomePageState extends State<HomePage> {
           child: CircleAvatar(
             radius: 30,
             backgroundColor: Colors.grey.shade300,
-            child: const Image(
-              image: AssetImage("assets/images/players/paras.png"),
-              height: 30,
-              width: 30,
-              fit: BoxFit.cover,
-            ),
+            backgroundImage: const AssetImage("assets/images/user.png"),
           ),
         ),
       ),
@@ -312,12 +373,22 @@ class _HomePageState extends State<HomePage> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 20, vertical: 8),
                                   child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Image(
                                         image: NetworkImage(
                                             "https://shotanalysis.000webhostapp.com/sample_analysis/${sampleAnalysis[items].src}"),
                                         width: 150,
                                         height: 150,
+                                        loadingBuilder:
+                                            ((context, child, loadingProgress) {
+                                          if (loadingProgress == null) {
+                                            return child;
+                                          }
+                                          return const Center(
+                                              child:
+                                                  CircularProgressIndicator());
+                                        }),
                                         fit: BoxFit.fill,
                                       ),
                                       heightSpace(10),
@@ -492,16 +563,23 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                             ),
-                            // IconButton(
-                            //     onPressed: () {
-                            //       Navigator.push(
-                            //           context,
-                            //           MaterialPageRoute(
-                            //               builder: (context) =>
-                            //                   AddPlayersDetails()));
-                            //     },
-                            //     icon: const Icon(Icons.add_circle,
-                            //         size: 30, color: Colors.black38))
+                            IconButton(
+                                onPressed: () {
+                                  Future data = Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              AddPlayersDetails(
+                                                from: "Add",
+                                              )));
+                                  data.then((value) => {
+                                        setState(() {
+                                          fetchPlayer();
+                                        })
+                                      });
+                                },
+                                icon: const Icon(Icons.add_circle,
+                                    size: 30, color: Colors.black38))
                           ],
                         )
                       ]),
@@ -521,11 +599,20 @@ class _HomePageState extends State<HomePage> {
                             itemBuilder: (context, items) {
                               return InkWell(
                                 onTap: () {
-                                  Navigator.push(
+                                  Future data = Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => PlayersDetails(
-                                              profileModel: players[items])));
+                                              profileModel: players[
+                                                  players.length -
+                                                      items -
+                                                      1])));
+                                  data.then((value) => {
+                                        setState(() {
+                                          players[players.length - items - 1] =
+                                              value;
+                                        })
+                                      });
                                 },
                                 child: Card(
                                   margin: const EdgeInsets.only(right: 20),
@@ -537,13 +624,25 @@ class _HomePageState extends State<HomePage> {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 20, vertical: 8),
                                     child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        Image(
-                                          image: NetworkImage(
-                                              "https://shotanalysis.000webhostapp.com/players/${players[items].src}"),
+                                        Image.network(
+                                          "https://shotanalysis.000webhostapp.com/players/${players[players.length - items - 1].src}",
+                                          loadingBuilder: ((context, child,
+                                              loadingProgress) {
+                                            if (loadingProgress == null) {
+                                              return child;
+                                            }
+                                            return const Center(
+                                                child:
+                                                    CircularProgressIndicator());
+                                          }),
+                                          // image: NetworkImage(
+                                          //     "https://shotanalysis.000webhostapp.com/players/${players[players.length - items - 1].src}"),
                                           width: 150,
                                           height: 150,
-                                          fit: BoxFit.fill,
+                                          fit: BoxFit.cover,
                                         ),
                                         heightSpace(10),
                                         Container(
@@ -551,7 +650,8 @@ class _HomePageState extends State<HomePage> {
                                           height: 40,
                                           alignment: Alignment.center,
                                           child: Text(
-                                            players[items].name,
+                                            players[players.length - items - 1]
+                                                .name,
                                             style: const TextStyle(
                                               fontFamily: "OpenSans",
                                               fontSize: 15,

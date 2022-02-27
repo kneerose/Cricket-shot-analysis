@@ -1,9 +1,12 @@
 import 'package:cricket_shot_analysis/model/profilemodel.dart';
+import 'package:cricket_shot_analysis/model/shotprofilemodel.dart';
 import 'package:cricket_shot_analysis/page/players/playersdetails.dart';
+import 'package:cricket_shot_analysis/provider/shotprovider.dart';
 import 'package:cricket_shot_analysis/random/data.dart';
 import 'package:cricket_shot_analysis/server/server_operation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import '../../constant.dart';
@@ -19,22 +22,51 @@ class _PlayersState extends State<Players> {
   final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
   List playerId = [];
+  List<ProfileModel> dataManage(data, id) {
+    List<ProfileModel> playersCopy = [];
+    List profiledetailsmatchdata = [];
+
+    // print(id);
+    for (int i = 0; i < id.length; i++) {
+      List<ShotProfileModel> shot = [];
+      for (int j = 0; j < 6; j++) {
+        shot.add(ShotProfileModel.fromMap({
+          "shot_name": data[6 * i + j]['shot_name'],
+          "shot_frequency": data[6 * i + j]['shot_frequency'],
+          "efficiency": data[6 * i + j]['efficiency'],
+        }));
+      }
+      print(shot);
+      profiledetailsmatchdata.add(data[6 * i]);
+      profiledetailsmatchdata[i].remove("shot_name");
+      profiledetailsmatchdata[i].remove("efficiency");
+      profiledetailsmatchdata[i].remove("shot_frequency");
+      profiledetailsmatchdata[i]["shot_profile"] = shot;
+      print(profiledetailsmatchdata[i]);
+
+      playersCopy.add(ProfileModel.fromMap(profiledetailsmatchdata[i]));
+
+      print("\n");
+    }
+    return playersCopy;
+  }
+
   void fetchPlayer() async {
-    List data = await ServerOperation().fetchplayerProfile();
-    print(data.length);
+    List data = await ServerOp().fetchplayerProfile();
+    //print(data.length);
+    Set id = {};
     for (int i = 0; i < data.length; i++) {
-      if (data[i] != null) {
-        if (playerId.isEmpty) {
-          setState(() {
-            players.add(ProfileModel.fromMap(data[i]));
-          });
-        } else {
-          if (!playerId.contains((int.parse(data[i]['id'])))) {
-            setState(() {
-              players.add(ProfileModel.fromMap(data[i]));
-            });
-          }
-        }
+      id.add(int.parse(data[i]['id']));
+    }
+    if (playerId.isEmpty) {
+      setState(() {
+        players = dataManage(data, id);
+      });
+    } else {
+      if (playerId != id) {
+        setState(() {
+          players = dataManage(data, id);
+        });
       }
     }
   }
@@ -94,7 +126,7 @@ class _PlayersState extends State<Players> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => PlayersDetails(
-                                      profileModel: players[items]))) ;
+                                      profileModel: players[items])));
                         },
                         child: Card(
                           margin: const EdgeInsets.only(right: 20),
@@ -107,12 +139,21 @@ class _PlayersState extends State<Players> {
                                 horizontal: 20, vertical: 8),
                             child: Column(
                               children: [
-                                Image(
-                                  image: NetworkImage(
-                                      "https://shotanalysis.000webhostapp.com/players/${players[items].src}"),
-                                  // width: 150,
-                                  // height: 150,
-                                  fit: BoxFit.fill,
+                                Expanded(
+                                  child: Image(
+                                    loadingBuilder:
+                                        ((context, child, loadingProgress) {
+                                      if (loadingProgress == null) {
+                                        return child;
+                                      }
+                                      return const Center(
+                                          child: CircularProgressIndicator());
+                                    }),
+                                    image: NetworkImage(
+                                        "https://shotanalysis.000webhostapp.com/players/${players[items].src}"),
+                                    height: 120,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                                 heightSpace(10),
                                 Container(

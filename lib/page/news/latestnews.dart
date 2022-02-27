@@ -18,7 +18,7 @@ class _LatestNewsState extends State<LatestNews> {
       RefreshController(initialRefresh: false);
   List storyId = [];
   void fetch() async {
-    List data = await ServerOperation().fetchNewsList();
+    List data = await ServerOp().fetchNewsList();
     print(data.length);
     for (int i = 0; i < data.length; i++) {
       if (data[i] != null) {
@@ -75,7 +75,7 @@ class _LatestNewsState extends State<LatestNews> {
               onRefresh: sync,
               controller: _refreshController,
               child: ListView.builder(
-                  itemCount: sampleImageList.length,
+                  itemCount: news.length,
                   itemBuilder: (context, items) {
                     return Card(
                         margin: const EdgeInsets.only(

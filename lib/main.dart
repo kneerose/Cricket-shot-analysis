@@ -1,9 +1,13 @@
 import 'package:cricket_shot_analysis/page/homepage.dart';
+import 'package:cricket_shot_analysis/provider/shotprovider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (_) => Shotprovider()),
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
