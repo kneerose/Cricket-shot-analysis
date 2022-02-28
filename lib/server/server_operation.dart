@@ -30,15 +30,13 @@ class ServerOp {
         headers: headers,
       );
       var outputdata = jsonDecode(response.body)['newsList'];
-      // print(outputdata);
       List story = [];
       for (int i = 0; i < outputdata.length; i++) {
         story.add(outputdata[i]['story']);
       }
-      print(story);
+
       return story;
     } catch (e) {
-      print(e);
       return [];
     }
   }
@@ -48,13 +46,15 @@ class ServerOp {
       final uri = Uri.parse("$_website/getplayernew.php");
       var response = await http.get(uri);
       if (response.statusCode == 200) {
-        print(response.body);
+        // print(response.body);
         return jsonDecode(response.body);
       } else {
-        print(response.statusCode);
+        // print(response.statusCode);
+        return null;
       }
     } catch (e) {
-      print(e);
+      // print(e);
+      return null;
     }
   }
 
@@ -62,16 +62,17 @@ class ServerOp {
     try {
       final uri = Uri.parse("$_website/getshot.php");
       var response = await http.get(uri);
-      print("jeda");
-      print(response.statusCode);
+      // print(response.statusCode);
       if (response.statusCode == 200) {
-        print(response.body);
+        // print(response.body);
         return jsonDecode(response.body);
       } else {
-        print(response.statusCode);
+        // print(response.statusCode);
+        return null;
       }
     } catch (e) {
-      print(e);
+      // print(e);
+      return null;
     }
   }
 
@@ -102,7 +103,6 @@ class ServerOp {
       required BuildContext context}) async {
     try {
       final uri = Uri.parse("$_website/players_upload.php");
-      print("hi $imagePath");
       var request = http.MultipartRequest('POST', uri);
       request.fields["name"] = name;
       request.fields["age"] = age;
@@ -114,7 +114,7 @@ class ServerOp {
       var picture = await http.MultipartFile.fromPath("image", imagePath);
       request.files.add(picture);
       var response = await request.send();
-      print(response.statusCode);
+      // print(response.statusCode);
       if (response.statusCode == 200) {
         SnackBar snackBar = const SnackBar(
             duration: Duration(milliseconds: 500),
@@ -125,9 +125,8 @@ class ServerOp {
             ));
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
         List data = await fetchplayerProfile();
-        print("data from $data");
         Map playerdetail = data[data.length - 1];
-        print("playerdetaild $playerdetail");
+        // print("playerdetaild $playerdetail");
         for (int i = 0; i < shot_profile.length; i++) {
           Map<String, dynamic> shotmap = {
             "id": "1",
@@ -136,9 +135,9 @@ class ServerOp {
             "shot_frequency": "0",
             "efficiency": "0.0",
           };
-          print(shotmap);
+          // print(shotmap);
           ShotModel shotModel = ShotModel.fromMap(shotmap);
-          print(shotModel.shotid);
+          // print(shotModel.shotid);
           addShot(shotModel: shotModel, context: context);
         }
       } else {
@@ -152,7 +151,7 @@ class ServerOp {
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
     } catch (e) {
-      print(e);
+      // print(e);
     }
   }
 
@@ -178,9 +177,6 @@ class ServerOp {
         "teams": teams
       };
       var response = await http.post(uri, body: body);
-      // var picture = await http.MultipartFile.fromPath("image", imagePath);
-      // request.files.add(picture);
-      print(response.statusCode);
       if (response.statusCode == 200) {
         SnackBar snackBar = const SnackBar(
             duration: Duration(milliseconds: 500),
@@ -190,23 +186,6 @@ class ServerOp {
                   fontFamily: 'OpenSans', color: Colors.white, fontSize: 18),
             ));
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        // List data = await fetchplayerProfile();
-        // print("data from $data");
-        // Map playerdetail = data[data.length - 1];
-        // print("playerdetaild $playerdetail");
-        // for (int i = 0; i < shot_profile.length; i++) {
-        //   Map<String, dynamic> shotmap = {
-        //     "id": "1",
-        //     "shot_id": shot_profile[i]['id'].toString(),
-        //     "player_id": playerdetail['id'].toString(),
-        //     "shot_frequency": "0",
-        //     "efficiency": "0.0",
-        //   };
-        //   print(shotmap);
-        //   ShotModel shotModel = ShotModel.fromMap(shotmap);
-        //   print(shotModel.shotid);
-        //   addShot(shotModel: shotModel, context: context);
-        // }
       } else {
         SnackBar snackBar = const SnackBar(
             duration: Duration(milliseconds: 500),
@@ -218,7 +197,7 @@ class ServerOp {
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
     } catch (e) {
-      print(e);
+      // print(e);
     }
   }
 
@@ -240,7 +219,6 @@ class ServerOp {
         'Content-Type': 'multipart/form-data'
       };
       String filename = filePath.split('/').last;
-      print(filename);
       FormData formData = FormData.fromMap({
         "file": await MultipartFile.fromFile(
           filePath,
@@ -249,25 +227,18 @@ class ServerOp {
         ),
         "type": 'image/jpeg'
       });
-      print("sad");
       Response response = await dio.post(url,
           data: formData,
           options: Options(
             headers: headers,
           ));
-      print(response.statusCode);
       if (response.statusCode == 200) {
-        print("from server ${response.data}");
         return response.data;
       } else {
-        print("error");
-      }
-    } on DioError catch (e) {
-      if (e.response != null) {
-        print(e);
+        return null;
       }
     } catch (e) {
-      print("caught error  $e");
+      return null;
     }
   }
 
@@ -306,7 +277,6 @@ class ServerOp {
       {required ShotModel shotModel, required BuildContext context}) async {
     try {
       final uri = Uri.parse("$_website/shot_edit.php");
-      print("sad");
       var body = {
         "id": shotModel.id.toString(),
         "player_id": shotModel.playerid.toString(),

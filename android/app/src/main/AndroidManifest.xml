@@ -2,7 +2,7 @@
     package="com.example.cricket_shot_analysis">
      <uses-permission android:name="android.permission.INTERNET"/>
    <application
-        android:label="cricket_shot_analysis"
+        android:label="cricket shot analysis"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

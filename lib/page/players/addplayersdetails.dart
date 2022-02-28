@@ -72,7 +72,7 @@ class _AddPlayersDetailsState extends State<AddPlayersDetails> {
     index =
         widget.from == "Edit" ? players.indexOf(widget.profileModel!) : null;
     print("hello $index");
-    print(widget.profileModel!.id);
+    // print(widget.profileModel!.id);
   }
 
   @override
@@ -140,22 +140,24 @@ class _AddPlayersDetailsState extends State<AddPlayersDetails> {
 
                             // backgroundImage: const AssetImage("assets/images/user.png"),
                             ),
-                        Positioned(
-                          right: -5,
-                          top: -5,
-                          child: IconButton(
-                              alignment: Alignment.topRight,
-                              onPressed: () {
-                                showDialog(
-                                    context: context,
-                                    builder: (context) => showdialog());
-                              },
-                              icon: Icon(
-                                Icons.add_a_photo,
-                                size: 30,
-                                color: Colors.grey.shade700,
-                              )),
-                        ),
+                        widget.from == "Add"
+                            ? Positioned(
+                                right: -5,
+                                top: -5,
+                                child: IconButton(
+                                    alignment: Alignment.topRight,
+                                    onPressed: () {
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) => showdialog());
+                                    },
+                                    icon: Icon(
+                                      Icons.add_a_photo,
+                                      size: 30,
+                                      color: Colors.grey.shade700,
+                                    )),
+                              )
+                            : const SizedBox(),
                       ],
                     ),
                   ),
