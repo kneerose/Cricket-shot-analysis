@@ -221,11 +221,23 @@ class _AnalysisState extends State<Analysis> {
                                     ? imagePicker(ImageSource.camera)
                                     : imagePicker(ImageSource.gallery);
                               },
-                              child: Icon(
-                                widget.from == "Camera"
-                                    ? FontAwesomeIcons.camera
-                                    : FontAwesomeIcons.image,
-                                size: 50,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    widget.from == "Camera"
+                                        ? FontAwesomeIcons.camera
+                                        : FontAwesomeIcons.image,
+                                    size: 50,
+                                  ),
+                                  heightSpace(20),
+                                  Text(
+                                    widget.from == "Camera"
+                                        ? "Capture the image to predict"
+                                        : "Select the image to predict",
+                                    style: textStyle,
+                                  )
+                                ],
                               ),
                             ),
                           ),
@@ -275,13 +287,15 @@ class _AnalysisState extends State<Analysis> {
                               ),
                             ),
                           ))
-                      : Positioned(
-                          bottom: 40,
-                          left: MediaQuery.of(context).size.width / 2 - 10,
-                          child: CircularProgressIndicator(
-                            color: Colors.grey.shade900,
-                          ),
-                        )
+                      : image != null
+                          ? Positioned(
+                              bottom: 40,
+                              left: MediaQuery.of(context).size.width / 2 - 10,
+                              child: CircularProgressIndicator(
+                                color: Colors.grey.shade900,
+                              ),
+                            )
+                          : const SizedBox()
                   // ...renderBoxes(MediaQuery.of(context).size)
                 ],
               ),
