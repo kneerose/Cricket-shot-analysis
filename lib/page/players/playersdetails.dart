@@ -276,7 +276,12 @@ class _PlayersDetailsState extends State<PlayersDetails> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text("BATTING STYLE "),
-                              Text(_shotprovider.profilemodel.battingstyle)
+                              widthSpace(70),
+                              Expanded(
+                                  child: Text(
+                                _shotprovider.profilemodel.battingstyle,
+                                textDirection: TextDirection.rtl,
+                              ))
                             ],
                           ),
                           heightSpace(10),
@@ -284,7 +289,12 @@ class _PlayersDetailsState extends State<PlayersDetails> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text("BOWLING STYLE "),
-                              Text(_shotprovider.profilemodel.bowlingstyle)
+                              widthSpace(70),
+                              Expanded(
+                                  child: Text(
+                                _shotprovider.profilemodel.bowlingstyle,
+                                textDirection: TextDirection.rtl,
+                              ))
                             ],
                           ),
                           heightSpace(10),
@@ -292,7 +302,12 @@ class _PlayersDetailsState extends State<PlayersDetails> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text("PLAYING ROLE "),
-                              Text(_shotprovider.profilemodel.playingrole)
+                              widthSpace(70),
+                              Expanded(
+                                  child: Text(
+                                _shotprovider.profilemodel.playingrole,
+                                textDirection: TextDirection.rtl,
+                              ))
                             ],
                           ),
                           heightSpace(10),
