@@ -37,6 +37,7 @@ class _PlayersDetailsState extends State<PlayersDetails> {
   int? _times;
   // late List shot;
   String? detectedShot;
+  // color for piechart
   List<Color> colorList = [
     Colors.red,
     Colors.green,
@@ -46,6 +47,7 @@ class _PlayersDetailsState extends State<PlayersDetails> {
     Colors.teal
   ];
   late Map<String, double> dataMap;
+  // list of shots for check
   Map<int, String> classeslist = {
     0: 'CutShot',
     1: 'CoverDrive',
@@ -106,6 +108,7 @@ class _PlayersDetailsState extends State<PlayersDetails> {
     return shotSelected;
   }
 
+// for least played shot
   ShotProfileModel checkLeastPlayedShot(Shotprovider shotprovider) {
     List _shotTimes = [];
     ShotProfileModel shotSelected = _shotprovider.profilemodel.shotprofile[0];
@@ -126,6 +129,7 @@ class _PlayersDetailsState extends State<PlayersDetails> {
     return shotSelected;
   }
 
+// update shot on detect
   void updateShot(Shotprovider shotprovider) {
     for (int item = 0; item < 6; item++) {
       print("$result");
@@ -133,6 +137,7 @@ class _PlayersDetailsState extends State<PlayersDetails> {
         print(_shotprovider.profileModel!.shotprofile[item].shotname);
         print(result['PredictedShot']);
         print(classeslist[result['PredictedShot']]);
+        // if predicted shot is match with available shot then update
         if (_shotprovider.profileModel!.shotprofile[item].shotname ==
             classeslist[result['PredictedShot']]) {
           print("i am inside shot");
@@ -179,6 +184,7 @@ class _PlayersDetailsState extends State<PlayersDetails> {
 
   @override
   Widget build(BuildContext context) {
+    // shot provider for update shot on all screen
     _shotprovider = Provider.of<Shotprovider>(context, listen: false);
     result.isEmpty
         ? (_fromEditprofileModel == null
@@ -188,7 +194,7 @@ class _PlayersDetailsState extends State<PlayersDetails> {
     result.isEmpty ? _shotprovider.dataMap = dataMap : null;
 
     // _shotprovider.tokenProviderDAta = token;
-
+// consumer of shot provider for getting updated data of shot
     return Consumer<Shotprovider>(builder: (_, shotprovider, __) {
       return Scaffold(
         appBar: AppBar(
@@ -705,6 +711,7 @@ class _PlayersDetailsState extends State<PlayersDetails> {
         ));
   }
 
+// for update profilemodel
   ProfileModel profileModelReturn(String? shot) {
     List<ShotProfileModel> shotprofileModel = [];
     print(shot_profile.length);

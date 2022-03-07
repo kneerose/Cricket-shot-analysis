@@ -22,15 +22,6 @@ class ProfileModel {
     required this.teams,
     required this.shotprofile,
     required this.token,
-    // required this.shotfrequency,
-    // required this.shotname,
-    // required this.efficiency
-    // required this.cut,
-    // required this.coverdrive,
-    // required this.straightdrive,
-    // required this.pullshot,
-    // required this.legglance,
-    // required this.scoop
   });
   factory ProfileModel.fromMap(Map<String, dynamic> map) => ProfileModel(
       id: int.parse(map['id']),
@@ -42,17 +33,7 @@ class ProfileModel {
       playingrole: map['playingrole'],
       teams: map['teams'],
       shotprofile: map['shot_profile'],
-      token: map['token']
-      // shotfrequency: map['shot_frequency'],
-      // efficiency: map['efficiency'],
-      // shotname: map["shot_name"]
-      // cut: int.parse(map['Cut']),
-      // coverdrive: int.parse(map['CoverDrive']),
-      // straightdrive: int.parse(map['StraightDrive']),
-      // pullshot: int.parse(map['PullShot']),
-      // legglance: int.parse(map['LegGlance']),
-      // scoop: int.parse(map['scoop']),
-      );
+      token: map['token']);
   Map<String, dynamic> tomap() => {
         'name': name,
         'imageSrc': src,

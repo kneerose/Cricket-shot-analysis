@@ -39,6 +39,7 @@ class _AddPlayersDetailsState extends State<AddPlayersDetails> {
   @override
   void initState() {
     super.initState();
+    // if token is ot in sharedpreferences then gettoken else use sharedpreferences stored token
     if (token == null) {
       generateToken();
     }
@@ -69,6 +70,7 @@ class _AddPlayersDetailsState extends State<AddPlayersDetails> {
   }
 
   void handleindex() {
+    // for edit profile we need index from players list to get exact model of player to edit
     index =
         widget.from == "Edit" ? players.indexOf(widget.profileModel!) : null;
     print("hello $index");
@@ -112,6 +114,7 @@ class _AddPlayersDetailsState extends State<AddPlayersDetails> {
               child: Column(
                 children: [
                   heightSpace(20),
+                  // circle image
                   Center(
                     child: Stack(
                       children: [
@@ -162,6 +165,7 @@ class _AddPlayersDetailsState extends State<AddPlayersDetails> {
                     ),
                   ),
                   heightSpace(20),
+                  // form for players details
                   Form(
                       key: _formKey,
                       child: Padding(
@@ -318,58 +322,15 @@ class _AddPlayersDetailsState extends State<AddPlayersDetails> {
                                   )),
                             ),
                             heightSpace(20),
+                            // submit button
                             Center(
                               child: ElevatedButton(
                                 onPressed: () async {
                                   if (_formKey.currentState!.validate()) {
-                                    // String imagecopy;
-                                    // if (image != null) {
-                                    //   imagecopy = image!;
-                                    // } else {
-                                    //   File file = await getImageFileFromAssets(
-                                    //       'images/user.png');
-                                    //   imagecopy = file.path;
-                                    // }
-                                    // print(imagecopy);
-
                                     if (image != null) {
                                       setState(() {
                                         loading = true;
                                       });
-                                      // print(imagecopy);
-                                      // print(image);
-
-                                      // List<ShotProfileModel> shotprofileModel = [];
-                                      // print(shot_profile.length);
-                                      // for (int i = 0; i < shot_profile.length; i++) {
-                                      //   Map<String, dynamic> map = {
-                                      //     "shot_name": shot_profile[i]['name'],
-                                      //     "efficiency": "0.0",
-                                      //     "shot_frequency": "0"
-                                      //   };
-                                      //   print(map);
-                                      //   shotprofileModel
-                                      //       .add(ShotProfileModel.fromMap(map));
-                                      //   print(shotprofileModel);
-                                      // }
-                                      // print(
-                                      //     "${_name.text} and ${_age.text} and ${_battingstyle.text} and ${_bowlingstyle.text} and ${_playingrole.text} and ${_teams.text}");
-                                      // Map<String, dynamic> profileModelmap = {
-                                      //   "id": "1",
-                                      //   "name": _name.text,
-                                      //   "age": _age.text,
-                                      //   "src": imagecopy,
-                                      //   "battingstyle": _battingstyle.text,
-                                      //   "bowlingstyle": _bowlingstyle.text,
-                                      //   "playingrole": _playingrole.text,
-                                      //   "teams": _teams.text,
-                                      //   "shot_profile": shotprofileModel,
-                                      // };
-                                      // print(profileModelmap);
-                                      // ProfileModel _profilemodel =
-                                      //     ProfileModel.fromMap(profileModelmap);
-                                      // print(_profilemodel);
-                                      // print(_name.text);
                                       widget.from == "Add"
                                           ? ServerOp()
                                               .setProfile(
@@ -485,41 +446,41 @@ class _AddPlayersDetailsState extends State<AddPlayersDetails> {
     );
   }
 
-  Widget formRow(String title, TextEditingController controller) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 5),
-          child: Text(title,
-              style: const TextStyle(
-                  fontFamily: 'OpenSans',
-                  color: kTextColor,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15)),
-        ),
-        heightSpace(10),
-        TextFormField(
-          controller: controller,
-          validator: (value) {
-            if (value != null) {
-              return value;
-            } else {
-              return null;
-            }
-          },
-          decoration: InputDecoration(
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
-              label: Text("Enter $title"),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5),
-              )),
-        ),
-      ],
-    );
-  }
-
+  // Widget formRow(String title, TextEditingController controller) {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Padding(
+  //         padding: const EdgeInsets.only(left: 5),
+  //         child: Text(title,
+  //             style: const TextStyle(
+  //                 fontFamily: 'OpenSans',
+  //                 color: kTextColor,
+  //                 fontWeight: FontWeight.w700,
+  //                 fontSize: 15)),
+  //       ),
+  //       heightSpace(10),
+  //       TextFormField(
+  //         controller: controller,
+  //         validator: (value) {
+  //           if (value != null) {
+  //             return value;
+  //           } else {
+  //             return null;
+  //           }
+  //         },
+  //         decoration: InputDecoration(
+  //             contentPadding:
+  //                 const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
+  //             label: Text("Enter $title"),
+  //             border: OutlineInputBorder(
+  //               borderRadius: BorderRadius.circular(5),
+  //             )),
+  //       ),
+  //     ],
+  //   );
+  // }
+// for picking image from source = camera,gallery
   Future imagePicker(
     ImageSource source,
   ) async {
@@ -541,6 +502,7 @@ class _AddPlayersDetailsState extends State<AddPlayersDetails> {
     }
   }
 
+// show from camera or gallery dialog
   Dialog showdialog() {
     return Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -601,13 +563,13 @@ class _AddPlayersDetailsState extends State<AddPlayersDetails> {
         ));
   }
 
-  Future<File> getImageFileFromAssets(String path) async {
-    final byteData = await rootBundle.load('assets/$path');
+//   Future<File> getImageFileFromAssets(String path) async {
+//     final byteData = await rootBundle.load('assets/$path');
 
-    final file = File('${(await getTemporaryDirectory()).path}/$path');
-    await file.writeAsBytes(byteData.buffer
-        .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+//     final file = File('${(await getTemporaryDirectory()).path}/$path');
+//     await file.writeAsBytes(byteData.buffer
+//         .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
 
-    return file;
-  }
+//     return file;
+//   }
 }

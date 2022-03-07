@@ -31,29 +31,40 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // controller for refresh
   final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
+
   bool isFetching = true;
+  // for unique id not repeat while sync
   Set storyId = {};
   Set playerId = {};
   Set sampleId = {};
   Set shotId = {};
+  // initial state before running build
   @override
   void initState() {
     // TODO: implement initState
     // fetchdata();
-
+    // get token number stored in sharedpreferences
+    // sharedpreferences = stored value according to key state locally
     sharedPrefGetToken();
+    // fetch sample analysis data from api
     fetchSampleAnalysis();
+    // fetch news from rapid api
     fetchNews();
+    // fetch player details from api
     fetchPlayer();
+    // fetch shots from api
     fetchshot();
 
     super.initState();
   }
 
   void sharedPrefGetToken() async {
+    // instance for share preferences
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    // set value from sharedpreferences token to token
     token = sharedPreferences.getString("token");
     print("my token is $token");
   }
@@ -63,13 +74,17 @@ class _HomePageState extends State<HomePage> {
   //     newsModel.add(NewsModel.fromMap(news[i]));
   //   }
   // }
+// for manage profilemodel list
+// profileModel = Model for player details
   List<ProfileModel> dataManage(data, id) {
     List<ProfileModel> playersCopy = [];
     List profiledetailsmatchdata = [];
 
     // print(id);
+    // loop for number of id length
     for (int i = 0; i < id.length; i++) {
       List<ShotProfileModel> shot = [];
+      // have 6 shots so multiple of 6
       for (int j = 0; j < 6; j++) {
         shot.add(ShotProfileModel.fromMap({
           "id": data[6 * i + j]['shot_id'],
@@ -79,13 +94,16 @@ class _HomePageState extends State<HomePage> {
         }));
       }
       print(shot);
+      // add players details from data to profiledetails
       profiledetailsmatchdata.add(data[6 * i]);
+      // remove shot_name,efficiency,shot_frequency from api fetch
       profiledetailsmatchdata[i].remove("shot_name");
       profiledetailsmatchdata[i].remove("efficiency");
       profiledetailsmatchdata[i].remove("shot_frequency");
+      //  add new key shot_profile and add list of shot data from above on it
       profiledetailsmatchdata[i]["shot_profile"] = shot;
       print(profiledetailsmatchdata[i]);
-
+      // add rearrange data on player profile
       playersCopy.add(ProfileModel.fromMap(profiledetailsmatchdata[i]));
 
       print("\n");
@@ -94,17 +112,21 @@ class _HomePageState extends State<HomePage> {
   }
 
   void fetchPlayer() async {
+    // fetch from fetchplayerprofile function from serverop class
     List data = await ServerOp().fetchplayerProfile();
     //print(data.length);
+    // for check the new id inserted or not
     Set id = {};
     for (int i = 0; i < data.length; i++) {
       id.add(int.parse(data[i]['id']));
     }
+    // if fetch first or have no data
     if (playerId.isEmpty) {
       setState(() {
         players = dataManage(data, id);
       });
     } else {
+      // if playerid is not match with newly fetch data id then add on players list
       if (playerId != id) {
         setState(() {
           players = dataManage(data, id);
@@ -178,8 +200,10 @@ class _HomePageState extends State<HomePage> {
       isFetching = false;
     });
   }
+  // for sync data on refresh
 
   void sync() {
+    // set list of id
     setState(() {
       storyId = news.map((e) => e.id).toSet();
       playerId = players.map((e) => e.id).toSet();
@@ -201,6 +225,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        // not automatically set back button
         automaticallyImplyLeading: false,
         elevation: 0.0,
         backgroundColor: Colors.transparent,
@@ -209,6 +234,7 @@ class _HomePageState extends State<HomePage> {
           style: textStyleTitle,
         ),
         // centerTitle: true,
+        // widget on left
         leading: Container(
           padding: const EdgeInsets.all(2),
           margin: const EdgeInsets.only(left: 10),
@@ -230,6 +256,7 @@ class _HomePageState extends State<HomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   heightSpace(10),
+                  // analyse shot
                   Container(
                     margin: const EdgeInsets.only(left: 10),
                     child: Text(
@@ -241,6 +268,7 @@ class _HomePageState extends State<HomePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
+                      // camera
                       Column(
                         children: [
                           InkWell(
@@ -268,6 +296,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
+                      // gallery
                       Column(
                         children: [
                           InkWell(
@@ -311,6 +340,7 @@ class _HomePageState extends State<HomePage> {
                   //   ),
                   //Image(image: FileImage(image!)),
                   heightSpace(50),
+                  // sample analysis
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -352,11 +382,13 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                   heightSpace(30),
+                  // sample shot display
                   SizedBox(
                     height: 200,
                     child: sampleAnalysis.isEmpty
                         ? const Center(child: CircularProgressIndicator())
                         : ListView.builder(
+                            // horizontal scroll
                             scrollDirection: Axis.horizontal,
                             itemCount: sampleAnalysis.length,
                             physics: const BouncingScrollPhysics(),
@@ -376,6 +408,7 @@ class _HomePageState extends State<HomePage> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Image(
+                                        // image from network image
                                         image: NetworkImage(
                                             "https://shotanalysis.000webhostapp.com/sample_analysis/${sampleAnalysis[items].src}"),
                                         width: 150,
@@ -415,6 +448,7 @@ class _HomePageState extends State<HomePage> {
                             }),
                   ),
                   heightSpace(50),
+                  // latest cricket news
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -455,6 +489,7 @@ class _HomePageState extends State<HomePage> {
                         )
                       ]),
                   heightSpace(30),
+                  // latest cricket news horizontal view
                   SizedBox(
                     height: 260,
                     child: isFetching
@@ -523,6 +558,7 @@ class _HomePageState extends State<HomePage> {
                             }),
                   ),
                   heightSpace(50),
+                  // players
                   Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -584,6 +620,7 @@ class _HomePageState extends State<HomePage> {
                         )
                       ]),
                   heightSpace(30),
+                  // players horizontal view
                   SizedBox(
                     height: 220,
                     child: players.isEmpty

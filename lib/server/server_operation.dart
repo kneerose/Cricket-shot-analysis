@@ -111,6 +111,7 @@ class ServerOp {
       request.fields["playingrole"] = playingrole;
       request.fields["teams"] = teams;
       request.fields["token"] = token;
+      // added image on api
       var picture = await http.MultipartFile.fromPath("image", imagePath);
       request.files.add(picture);
       var response = await request.send();
@@ -127,6 +128,7 @@ class ServerOp {
         List data = await fetchplayerProfile();
         Map playerdetail = data[data.length - 1];
         // print("playerdetaild $playerdetail");
+        // add six shot on shot of db
         for (int i = 0; i < shot_profile.length; i++) {
           Map<String, dynamic> shotmap = {
             "id": "1",

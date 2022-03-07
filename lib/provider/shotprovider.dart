@@ -4,17 +4,21 @@ import 'package:cricket_shot_analysis/random/data.dart';
 import 'package:flutter/cupertino.dart';
 
 class Shotprovider with ChangeNotifier {
+  // for profilemodel
   ProfileModel? profileModel;
   ProfileModel get profilemodel => profileModel!;
   void setProfileModel(profileModelCopy) {
     profileModel = profileModelCopy;
   }
 
+// for piechart datamap
   Map<String, double>? dataMap;
   Map<String, double> get datamap => dataMap!;
   void setDataMap(dataMapCopy) {
     dataMap = dataMapCopy;
   }
+
+  // for token provider
 
   String? tokenProviderDAta;
   String get toKen => tokenProviderDAta!;
